@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -25,9 +25,35 @@ async function run() {
     // await client.connect();
 
     const collageCollection = client.db("collageDB").collection("collage");
+    const admissionCollection = client.db("collageDB").collection("admission");
 
     app.get("/collage", async (req, res) => {
       const result = await collageCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/collage/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await collageCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/admissionByEmail", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+
+      const result = await admissionCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/admission", async (req, res) => {
+      const product = req.body;
+      const result = await admissionCollection.insertOne(product);
       res.send(result);
     });
 
