@@ -26,6 +26,7 @@ async function run() {
 
     const collageCollection = client.db("collageDB").collection("collage");
     const admissionCollection = client.db("collageDB").collection("admission");
+    const reviewCollection = client.db("collageDB").collection("review");
 
     app.get("/collage", async (req, res) => {
       const result = await collageCollection.find().toArray();
@@ -51,9 +52,23 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/review", async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    });
     app.post("/admission", async (req, res) => {
-      const product = req.body;
-      const result = await admissionCollection.insertOne(product);
+      const admission = req.body;
+      const result = await admissionCollection.insertOne(admission);
+      res.send(result);
+    });
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const query = { university: review.university, email: review.email };
+      const existing = await reviewCollection.findOne(query);
+      if (existing) {
+        return res.send({ message: " Already Review" });
+      }
+      const result = await reviewCollection.insertOne(review);
       res.send(result);
     });
 
